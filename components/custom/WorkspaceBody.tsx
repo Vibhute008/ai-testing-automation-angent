@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useContext } from "react";
 import { UserDetailContext } from "@/context/UserDetailContext";
 import Image from "next/image";
@@ -7,9 +7,30 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Link } from "lucide-react";
 import EmptyWorkspace from "./EmptyWorkspace";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 function WorkspaceBody() {
+
+
   const { userDetails } = useContext(UserDetailContext);
+
+  const router = useRouter();
+
+  const [accessToken, setAccessToken] = React.useState<string | null>(null);
+
+  useEffect(() => {
+    GetGithubToken();
+  }, []);
+
+  const GetGithubToken = async () => {
+    const result = await axios.get("/api/github/token");
+    console.log("Github Access Token:", result.data.accessToken);
+  }
+
+  const onAddRepo = async () => {
+    router.push("/api/github");
+  };
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -24,13 +45,19 @@ function WorkspaceBody() {
           <Image src="/github.png" alt="GitHub" width={40} height={40} />
           <h2 className="text-lg">Connect Github & Add Repository</h2>
         </div>
-        <Button>Setup</Button>
+        <div>
+          {!accessToken ? (
+            <Button onClick={onAddRepo}>Setup</Button>
+          ) : (
+            <Button>Add Repo</Button>
+          )}
+        </div>
       </Card>
 
       <Card className="rounded-xl border bg-card text-card-foreground shadow mt-10">
-       <CardContent>
-        <EmptyWorkspace />
-       </CardContent>
+        <CardContent>
+          <EmptyWorkspace />
+        </CardContent>
       </Card>
     </div>
   );
